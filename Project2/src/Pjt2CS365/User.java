@@ -32,14 +32,13 @@ public class User extends Pack {
     public JTextArea getNewsFeedDisplay(){return newsFeedDisplay;}
 
 
-
     public void writeInNewsFeed(String message, String author){
         String send = "- "+ author + ": " + message + "\n";
         myMessages.add(send);
         newsFeedDisplay.append(send);
     }
     public void writeMyOwnMessage(String message){
-        writeInNewsFeed(message, this.getId());
+        writeInNewsFeed(message + " Written at: " + this.getLastUpdateTime(), this.getId());
     }
     private void addFollowers(User u){
         followers.add(new UserObserver(u));
@@ -55,6 +54,7 @@ public class User extends Pack {
         u.addFollowers(this);
     }
     public void tweet(String s){
+        this.setLastUpdateTime(System.currentTimeMillis());
         writeMyOwnMessage(s);
         for(Observer o : followers) {
             o.update(s, this);
@@ -77,7 +77,7 @@ public class User extends Pack {
             return null;
     }
     @Override
-    public String readAll( int tab) {
+    public String readAll(int tab) {
         String s = "";
         for(int i=0; i<tab; i++)
             s+="  ";
@@ -87,5 +87,10 @@ public class User extends Pack {
     @Override
     public void accept(Visitor v) {
         v.atUser(this);
+    }
+
+    @Override
+    public Pack lastUpdated() {
+        return this;
     }
 }

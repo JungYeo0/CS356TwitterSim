@@ -13,7 +13,6 @@ public class TotalMessageVisitor implements Visitor{
 
     private boolean goodVibrations(User u){
         String lastMsg = u.getMyMessages().get(u.getMyMessages().size()-1);
-        System.out.println(lastMsg);
         return lastMsg.contains("cool")|| lastMsg.contains("great")|| lastMsg.contains("sup");
     }
     @Override

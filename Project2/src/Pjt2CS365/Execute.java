@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Execute extends JFrame {
     private UserGroup root;
@@ -123,7 +125,8 @@ public class Execute extends JFrame {
     private JPanel makeMemberWindowPan(){
         JPanel main = new JPanel();
         JTextField userNameSelect = new JTextField(10);
-        JButton userSelect = new JButton("User");
+        JButton userSelect = new JButton("User"),
+        validIDs = new JButton("valid ID check");
 
         class UserSelectListener implements ActionListener{
             @Override
@@ -138,20 +141,63 @@ public class Execute extends JFrame {
         userSelect.addActionListener(new UserSelectListener());
         main.add(userNameSelect); main.add(userSelect);
 
+        class validIDsListener implements ActionListener{
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String completeList = root.readAll(0);
+                boolean checkCurr=false;
+                Set<String> uniqueNameCheck = new HashSet<>();
+                int startWord=0;
+                for(int i=0; i< completeList.length(); i++){
+                    if(checkCurr){
+                        if(completeList.charAt(i)== ' '){
+                            System.out.println("invalid ID found");
+                            break;
+                        }
+                        else if(completeList.charAt(i)=='\n'){
+                            checkCurr=false;
+                            if (!uniqueNameCheck.add(completeList.substring(startWord, i))){
+                                System.out.println("non Unique ID found");
+                                break;
+                            }
+
+                        }
+                    }
+                    else {
+                        if (completeList.charAt(i) == '[') {
+                            i += 9;
+                            startWord = i+1;
+                            checkCurr = true;
+                        } else if (completeList.charAt(i) == '-') {
+                            i++;
+                            startWord = i+1;
+                            checkCurr = true;
+                        }
+                    }
+                }
+            }
+        }
+        validIDs.addActionListener(new validIDsListener());
+        main.add(validIDs);
+
         return main;
     }
     private JPanel makeAdminControlPan(){
         JPanel  main = new JPanel(),
                 row1 = new JPanel(),
-                row2 = new JPanel();
+                row2 = new JPanel(),
+                row3 = new JPanel();
         main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
         row1.setLayout(new FlowLayout());
         row2.setLayout(new FlowLayout());
+        row3.setLayout(new FlowLayout());
 
         JButton userTotal = new JButton("Show User Total"),
                 groupTotal  = new JButton("Show Group Total"),
                 msgTotal = new JButton("Show Message Total"),
-                posPercentTotal = new JButton("Show Positive Percentage");
+                posPercentTotal = new JButton("Show Positive Percentage"),
+                lastUpdatedUser = new JButton("Show Last Updated User");
 
         class UserTotalListener implements ActionListener{
             @Override
@@ -177,16 +223,25 @@ public class Execute extends JFrame {
                 adminPopUps("Positive Vibes", "Positive Messages: " + msgTot.getTotalPositiveMsg());
             }
         }
+        class LastUpdatedUserListener implements ActionListener{
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Pack lastUpdated = root.lastUpdated();
+                System.out.println(lastUpdated.getId() + ": " + lastUpdated.getLastUpdateTime());
+            }
+        }
 
         userTotal.addActionListener(new UserTotalListener());
         groupTotal.addActionListener(new GroupTotalListener());
         msgTotal.addActionListener(new MsgTotalListener());
         posPercentTotal.addActionListener(new PosPercentTotalListener());
+        lastUpdatedUser.addActionListener(new LastUpdatedUserListener());
 
         row1.add(userTotal); row1.add(groupTotal);
         row2.add(msgTotal); row2.add(posPercentTotal);
+        row3.add(lastUpdatedUser);
 
-        main.add(row1); main.add(row2);
+        main.add(row1); main.add(row2); main.add(row3);
         return main;
     }
 
@@ -210,7 +265,7 @@ public class Execute extends JFrame {
     ////////////////////////////////////////////
     //user window
     private void newUserPopup(User u){
-        JFrame userWindow = new JFrame("User: " + u.getId());
+        JFrame userWindow = new JFrame("User: " + u.getId() + "  Created at:" + u.getCreationTime());
         userWindow.setName(u.getId());
         userWindow.setLocationRelativeTo(null);
         userWindow.setSize(500,500);

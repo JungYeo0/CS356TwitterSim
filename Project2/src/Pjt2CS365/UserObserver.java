@@ -6,6 +6,7 @@ public class UserObserver implements Observer {
 
     @Override
     public void update(String msg, User sender) {
-        self.writeInNewsFeed(msg, sender.getId());
+        self.writeInNewsFeed(msg + " Written at: " + sender.getLastUpdateTime() , sender.getId());
+        self.setLastUpdateTime(sender.getLastUpdateTime());
     }
 }

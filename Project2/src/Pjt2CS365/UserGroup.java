@@ -127,6 +127,19 @@ public class UserGroup extends Pack{
         v.atGroup(this);
     }
 
-
+    @Override
+    public Pack lastUpdated() {
+        Pack smallest = null;
+        for(Pack p : membership){
+            if (smallest == null)
+                smallest = p.lastUpdated();
+            Pack next = p.lastUpdated();
+            if(next==null)
+                continue;
+            if(next.getLastUpdateTime() <= smallest.getLastUpdateTime())
+                smallest = next;
+        }
+        return smallest;
+    }
 }
 
